@@ -72,7 +72,7 @@ def main():
         
     try:
         completion = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-5",
             messages=[
                 {"role": "system", "content": specific_prompt},
                 {"role": "user", "content": user_text}

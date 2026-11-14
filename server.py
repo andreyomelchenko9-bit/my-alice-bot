@@ -76,7 +76,7 @@ def main():
                 {"role": "user", "content": user_text}
             ],
             max_tokens=150,
-            timeout=3.0
+            timeout=3.5
         )
         first_choice = next(iter(completion.choices))
         reply = first_choice.message.content.strip()

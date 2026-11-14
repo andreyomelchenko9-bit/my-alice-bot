@@ -7,7 +7,7 @@ app = Flask(__name__)
 api_key = os.environ.get("OPENAI_API_KEY", "").strip()
 
 client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
+    base_url="https://openrouter.ai",
     api_key=api_key
 )
 
@@ -78,7 +78,7 @@ def main():
             max_tokens=150,
             timeout=4.3
         )
-        reply = completion.choices.message.content.strip()
+        reply = completion.choices[0].message.content.strip()
     except Exception as e:
         reply = f"Техническая ошибка: {str(e)[:120]}"
         

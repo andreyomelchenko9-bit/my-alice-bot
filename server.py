@@ -8,7 +8,11 @@ api_key = os.environ.get("OPENAI_API_KEY", "").strip()
 
 client = OpenAI(
     base_url="https://openrouter.ai",
-    api_key=api_key
+    api_key=api_key,
+    default_headers={
+        "HTTP-Referer": "https://mybestbot.onrender.com",
+        "X-Title": "Alice Skill"
+    }
 )
 
 BASE_PROMPT = (
@@ -70,7 +74,7 @@ def main():
         
     try:
         completion = client.chat.completions.create(
-            model="nvidia/nemotron-3.5-lightning:free",
+            model="openrouter/free",
             messages=[
                 {"role": "system", "content": specific_prompt},
                 {"role": "user", "content": user_text}
@@ -78,7 +82,8 @@ def main():
             max_tokens=150,
             timeout=4.3
         )
-        reply = completion.choices[0].message.content.strip()
+        first_choice = next(iter(completion.choices))
+        reply = first_choice.message.content.strip()
     except Exception as e:
         reply = f"Техническая ошибка: {str(e)[:120]}"
         

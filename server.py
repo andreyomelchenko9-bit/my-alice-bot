@@ -7,7 +7,7 @@ app = Flask(__name__)
 api_key = os.environ.get("OPENAI_API_KEY", "").strip()
 
 client = OpenAI(
-    base_url="https://openrouter.ai",
+    base_url="https://openrouter.ai/api/v1",
     api_key=api_key
 )
 
@@ -70,7 +70,7 @@ def main():
         
     try:
         completion = client.chat.completions.create(
-            model="google/gemma-3-27b-it:free",
+            model="nvidia/nemotron-3.5-lightning:free",
             messages=[
                 {"role": "system", "content": specific_prompt},
                 {"role": "user", "content": user_text}

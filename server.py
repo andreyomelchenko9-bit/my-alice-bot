@@ -4,7 +4,6 @@ from openai import OpenAI
 
 app = Flask(__name__)
 
-# Очищаем ключ от случайных пробелов по краям
 api_key = os.environ.get("OPENAI_API_KEY", "").strip()
 
 client = OpenAI(
@@ -71,7 +70,7 @@ def main():
         
     try:
         completion = client.chat.completions.create(
-            model="openrouter/free",
+            model="google/gemma-3-27b-it:free",
             messages=[
                 {"role": "system", "content": specific_prompt},
                 {"role": "user", "content": user_text}
@@ -79,7 +78,7 @@ def main():
             max_tokens=150,
             timeout=4.3
         )
-        reply = completion.choices[0].message.content.strip()
+        reply = completion.choices.message.content.strip()
     except Exception as e:
         reply = f"Техническая ошибка: {str(e)[:120]}"
         

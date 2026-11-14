@@ -76,7 +76,7 @@ def main():
     try:
         # Запрос к выбранной вами модели GPT-5 через OpenRouter
         completion = client.chat.completions.create(
-            model="gpt-5",
+            model="openrouter/free",
             messages=[
                 {"role": "system", "content": specific_prompt},
                 {"role": "user", "content": user_text}

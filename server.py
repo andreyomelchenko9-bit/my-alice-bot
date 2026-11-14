@@ -1,4 +1,6 @@
 import os
+import urllib.request
+import json
 from flask import Flask, request, jsonify
 from openai import OpenAI
 
@@ -7,7 +9,7 @@ app = Flask(__name__)
 api_key = os.environ.get("OPENAI_API_KEY", "").strip()
 
 client = OpenAI(
-    base_url="https://openrouter.ai",
+    base_url="https://openrouter.ai/api/v1",
     api_key=api_key,
     default_headers={
         "HTTP-Referer": "https://mybestbot.onrender.com",
@@ -28,10 +30,28 @@ BASE_PROMPT = (
 )
 
 current_role = "обычный универсальный ИИ-ассистент"
+cached_free_model = None
+
+def get_working_free_model():
+    global cached_free_model
+    if cached_free_model:
+        return cached_free_model
+    try:
+        req = urllib.request.Request("https://openrouter.ai/api/v1/models")
+        with urllib.request.urlopen(req, timeout=2.0) as resp:
+            data = json.loads(resp.read().decode())
+            for m in data.get("data", []):
+                mid = m.get("id", "")
+                if mid.endswith(":free"):
+                    cached_free_model = mid
+                    return mid
+    except Exception:
+        pass
+    return "openrouter/free"
 
 @app.route('/', methods=['POST'])
 def main():
-    global current_role
+    global current_role, cached_free_model
     req = request.json
     
     response = {
@@ -71,21 +91,23 @@ def main():
         return jsonify(response)
 
     specific_prompt = f"{BASE_PROMPT} Сейчас твоя роль, характер и манера речи: {current_role}."
+    model_id = get_working_free_model()
         
     try:
         completion = client.chat.completions.create(
-            model="openrouter/free",
+            model=model_id,
             messages=[
                 {"role": "system", "content": specific_prompt},
                 {"role": "user", "content": user_text}
             ],
             max_tokens=150,
-            timeout=4.3
+            timeout=4.0
         )
         first_choice = next(iter(completion.choices))
         reply = first_choice.message.content.strip()
     except Exception as e:
-        reply = f"Техническая ошибка: {str(e)[:120]}"
+        cached_free_model = None
+        reply = f"Ошибка ({model_id}): {str(e)[:100]}"
         
     response['response']['text'] = reply
     return jsonify(response)
